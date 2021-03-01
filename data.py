@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 import pandas as pd
 
@@ -23,19 +24,27 @@ def get_multiclass_data():
     df = pd.read_table(MULTICLASS_CLASSIFICATION, header=None, sep=' ')
     data = np.array(df.drop(df.columns[[5]], axis=1))
     new_data = []
-    features = set()
+    labels = set()
     for row in data:
         new_row = [0] * 5
-        new_row[0] = row[0]
+        new_label = row[0]
+        new_row[0] = new_label
+        labels.add(new_label)
         for cell in row:
             if isinstance(cell, str):
                 feature = int(cell.split(':')[0])
-                if feature not in features:
-                    features.add(feature)
                 value = float(cell.split(':')[1])
                 new_row[feature] = value
         new_data.append(new_row)
-    return (np.array(new_data), list(features))
+    return new_data, list(labels)
 
 
-# print(get_multiclass_data()[:5])
+def one_versus_all(data, label):
+    new_data = []
+    for row in data:
+        new_row = deepcopy(row)
+        new_row[0] = 1 if label == row[0] else -1
+        new_data.append(new_row)
+    return new_data
+
+    # print(get_multiclass_data()[:5])

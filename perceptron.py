@@ -1,8 +1,7 @@
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from data import get_binary_data, get_multiclass_data
-from linear_algebra import normalize, normalize_dict
+from data import get_binary_data, get_multiclass_data, one_versus_all
+from linear_algebra import normalize
+from random import random, randint
 
 
 def predict(feature_vector, weights):
@@ -10,16 +9,14 @@ def predict(feature_vector, weights):
 
 
 def predict_multiclass(feature_vector, weightsDict):
-    dotProductDict = {}
+    prediction = float('-inf')
+    best_key = None
     for key in weightsDict.keys():
-        dotProductDict[key] = feature_vector.dot(weightsDict[key])
-    maxDotProduct = float('-inf')
-    maxKey = None
-    for key in dotProductDict.keys():
-        if dotProductDict[key] > maxDotProduct:
-            maxDotProduct = dotProductDict[key]
-            maxKey = key
-    return maxKey
+        product = feature_vector.dot(weightsDict[key])
+        if product > prediction:
+            prediction = product
+            best_key = key
+    return best_key
 
 
 def add_bias_term(data):
@@ -46,21 +43,12 @@ def perceptron(training_data, learning_rate, epochs, multiplier):
 
 
 def multiclass_perceptron(training_data, learning_rate, epochs, multiplier, labels):
-    new_training_data = add_bias_term(training_data)
     weightsDict = {}
     for label in labels:
-        weightsDict[label] = np.zeros(new_training_data.shape[1] - 1)
-    for _ in range(epochs):
-        for datum in new_training_data:
-            learning_rate *= multiplier
-            feature_vector = datum[1:]
-            label = datum[0]
-            predicted_label = predict_multiclass(feature_vector, weightsDict)
-            if not label == predicted_label:
-                update_vector = (learning_rate * feature_vector)
-                weightsDict[label] += update_vector
-                weightsDict[predicted_label] -= update_vector
-    return normalize_dict(weightsDict)
+        new_training_data = one_versus_all(training_data, label)
+        weightsDict[label] = perceptron(
+            new_training_data, learning_rate, epochs, multiplier)
+    return weightsDict
 
 
 def perceptron_accuracy(testing_data, weights):
@@ -104,10 +92,16 @@ def run_multiclass_perceptron():
     middle = round(len(data) / 2)
     training_data = data[:middle]
     testing_data = data[middle:]
-    weights = multiclass_perceptron(training_data, 0.1, 20, 0.85, labels)
-    print(weights)
-    return multiclass_perceptron_accuracy(testing_data, weights)
+    weightsDict = multiclass_perceptron(training_data, 0.8, 50, 0.99, labels)
+    print(weightsDict)
+    return multiclass_perceptron_accuracy(testing_data, weightsDict)
 
 
-# print(run_perceptron())
+def individual(training_data, labels, iter=10):
+    sum = 0
+    for _ in range(iter):
+        sum += multiclass_perceptron(training_data, random(),
+                                     randint(1, 100), min(1, random() + 0.5), labels)
+
+
 print(run_multiclass_perceptron())
