@@ -61,8 +61,9 @@ def perceptron_accuracy(testing_data, weights):
         label = datum[0]
         predicted_label = predict(feature_vector, weights)
         if not label == predicted_label:
+            print(f'Incorrect: Actual {label}, predicted {predicted_label}')
             errors += 1
-    return errors / len(new_testing_data)
+    return 1 - (errors / len(new_testing_data))
 
 
 def multiclass_perceptron_accuracy(testing_data, weightsDict):
@@ -74,7 +75,7 @@ def multiclass_perceptron_accuracy(testing_data, weightsDict):
         predicted_label = predict_multiclass(feature_vector, weightsDict)
         if not label == predicted_label:
             errors += 1
-    return errors / len(new_testing_data)
+    return 1 - (errors / len(new_testing_data))
 
 
 def run_perceptron():
@@ -124,18 +125,12 @@ def optimize_multiclass_perceptron(population_size):
     print(best_individual, best_learning_rate, best_epochs, best_multiplier)
 
 
-# optimize_multiclass_perceptron(50)
-sum = 0
-for _ in range(0):
-    score = run_multiclass_perceptron(0.82, 96, 0.7986)
-    print(score)
-    sum += score
-print(sum / 30)
+optimize_multiclass_perceptron(50)
 print(run_perceptron())
 """
-learning rate: 0.82
-epochs: 96,
-multiplier: .79
+learning rate: 
+epochs:
+multiplier:
 
 
 """
