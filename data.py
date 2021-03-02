@@ -20,7 +20,7 @@ def get_binary_data():
     return np.array(new_data)
 
 
-def get_multiclass_data():
+def get_multiclass_data(is_np=False):
     df = pd.read_table(MULTICLASS_CLASSIFICATION, header=None, sep=' ')
     data = np.array(df.drop(df.columns[[5]], axis=1))
     new_data = []
@@ -35,6 +35,8 @@ def get_multiclass_data():
                 feature = int(cell.split(':')[0])
                 value = float(cell.split(':')[1])
                 new_row[feature] = value
+        if is_np:
+            new_row = np.array(new_row)
         new_data.append(new_row)
     return new_data, list(labels)
 
